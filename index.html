@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>共同點餐 V1.6</title>
+  <title>共同點餐 V1.7</title>
   <style>
     * { box-sizing: border-box; }
     body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",Arial,sans-serif; background:#f4f4f4; color:#171717; }
@@ -42,7 +42,7 @@
 </head>
 <body>
 <header>
-  <h1>共同點餐 V1.6</h1>
+  <h1>共同點餐 V1.7</h1>
   <div id="status" class="status">Firebase 連線中...</div>
 </header>
 
@@ -81,9 +81,27 @@
         <input id="menuCamera" type="file" accept="image/*" capture="environment" onchange="handleMenuImage(event)" />
         <input id="menuGallery" type="file" accept="image/*" onchange="handleMenuImage(event)" />
         <img id="menuImagePreview" class="previewImg hide" />
+
+        <div id="ocrHelper" class="hide" style="margin-top:16px;">
+          <div style="background:#eef5ff;border-radius:18px;padding:14px;">
+            <strong>圖片文字擷取建議</strong>
+            <div class="small" style="margin-top:6px;">
+              Android：長按圖片 → 擷取文字 / Google Lens<br>
+              iPhone：照片 → 長按文字 → 拷貝文字
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:12px;">
+            <button class="secondary" onclick="copyOcrGuide()">複製操作提示</button>
+            <button onclick="scrollToTextArea()">前往貼上文字</button>
+          </div>
+        </div>
       </div>
 
-      <label>貼上菜單文字</label>
+      <label>貼上辨識文字</label>
+      <div class="small" style="margin-bottom:8px;">
+        將 Google Lens / iPhone 文字擷取結果貼在這裡，系統會自動解析店名、電話、菜名與價格。
+      </div>
       <textarea id="menuText" placeholder="格式範例：
 利威特小館
 訂購專線：(07)374-5641
@@ -200,10 +218,43 @@ function showPage(page) {
 function handleMenuImage(event) {
   const file = event.target.files && event.target.files[0];
   if (!file) return;
+
   const url = URL.createObjectURL(file);
   const img = document.getElementById("menuImagePreview");
+
   img.src = url;
   img.classList.remove("hide");
+
+  document.getElementById("ocrHelper").classList.remove("hide");
+
+  setTimeout(() => {
+    alert("圖片已載入\n\n請使用手機內建文字擷取功能\n再貼到下方文字框進行解析");
+  }, 300);
+}
+
+function scrollToTextArea() {
+  document.getElementById("menuText").scrollIntoView({
+    behavior: "smooth",
+    block: "center"
+  });
+
+  document.getElementById("menuText").focus();
+}
+
+function copyOcrGuide() {
+  const text = `圖片文字擷取方式：
+
+Android：
+長按圖片 → Google Lens / 擷取文字
+
+iPhone：
+照片 → 長按文字 → 拷貝文字
+
+接著貼到下方菜單文字框即可自動解析`;
+
+  navigator.clipboard.writeText(text).then(() => {
+    alert("已複製操作說明");
+  });
 }
 
 function loadSample() {
