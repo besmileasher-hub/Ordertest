@@ -1,97 +1,149 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>共同點餐 V1.3 Firebase</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>共同點餐 V1.4</title>
   <style>
-    *{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans TC',Arial,sans-serif;background:#f6f6f6;color:#222}header{position:sticky;top:0;background:#fff;z-index:5;padding:14px 16px;border-bottom:1px solid #e5e5e5}h1{font-size:20px;margin:0}.sub{font-size:12px;color:#666;margin-top:4px}.wrap{max-width:980px;margin:0 auto;padding:14px}.card{background:white;border-radius:18px;padding:14px;margin-bottom:12px;box-shadow:0 2px 12px rgba(0,0,0,.05)}.row{display:flex;gap:8px;flex-wrap:wrap}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}button{border:0;background:#111;color:white;border-radius:14px;padding:11px 14px;font-weight:700;cursor:pointer}button.secondary{background:#eee;color:#222}button.danger{background:#b3261e}button.small{padding:7px 10px;border-radius:10px}input,textarea,select{width:100%;border:1px solid #ddd;border-radius:14px;padding:11px;font-size:16px;background:#fff}textarea{min-height:160px}.muted{color:#777;font-size:13px}.title{font-weight:800;margin-bottom:8px}.menuItem,.orderItem,.storeItem{border:1px solid #eee;border-radius:16px;padding:12px;margin:8px 0;background:#fff}.price{font-weight:900;font-size:18px}.tabs{display:flex;gap:8px;overflow:auto;padding-bottom:8px}.tabs button{white-space:nowrap}.active{outline:3px solid #ddd}.pill{display:inline-block;background:#eee;border-radius:999px;padding:4px 9px;font-size:12px;margin-right:4px}.total{background:#111;color:#fff;border-radius:18px;padding:16px}.total .num{font-size:28px;font-weight:900}.ok{color:#16823a}.bad{color:#b3261e}.share{font-size:13px;word-break:break-all;background:#f1f1f1;border-radius:12px;padding:10px}.hidden{display:none}.kv{display:grid;grid-template-columns:70px 1fr;gap:6px;font-size:14px}.split{display:flex;justify-content:space-between;gap:8px}.name{font-weight:800}.note{font-size:12px;color:#666;margin-top:4px}
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",Arial,sans-serif; background:#f4f4f4; color:#171717; }
+    header { background:white; padding:20px 18px 16px; border-bottom:1px solid #ddd; position:sticky; top:0; z-index:10; }
+    h1 { margin:0; font-size:28px; }
+    .status { margin-top:6px; color:#16803c; font-weight:700; }
+    .tabs { display:flex; gap:10px; padding:16px; overflow-x:auto; background:#f4f4f4; position:sticky; top:82px; z-index:9; }
+    button { border:none; border-radius:18px; padding:13px 18px; font-size:16px; font-weight:800; background:#111; color:white; cursor:pointer; }
+    button.secondary { background:#e8e8e8; color:#111; }
+    main { padding:0 16px 36px; max-width:860px; margin:auto; }
+    .card { background:white; border-radius:26px; padding:22px; margin:14px 0 20px; box-shadow:0 1px 0 rgba(0,0,0,.04); }
+    h2 { margin:0 0 14px; font-size:24px; }
+    label { display:block; color:#666; margin:12px 0 6px; font-weight:700; }
+    input, textarea { width:100%; border:1px solid #d6d6d6; border-radius:18px; padding:14px 16px; font-size:18px; background:white; }
+    textarea { min-height:210px; resize:vertical; line-height:1.5; }
+    .row { display:flex; gap:10px; align-items:center; }
+    .row > * { flex:1; }
+    .small { color:#666; font-size:14px; line-height:1.5; }
+    .store, .menu-item, .order { border:1px solid #eee; background:#fafafa; border-radius:18px; padding:14px; margin:10px 0; }
+    .store.active { border:2px solid #111; background:#fff; }
+    .item-line { display:flex; justify-content:space-between; gap:12px; align-items:center; }
+    .price { font-weight:900; font-size:20px; white-space:nowrap; }
+    .pill { display:inline-block; padding:5px 10px; border-radius:999px; background:#eee; color:#333; font-size:13px; margin-top:6px; }
+    .danger { background:#ffecec !important; color:#a00 !important; }
+    .hide { display:none; }
+    .total { background:#111; color:white; border-radius:22px; padding:18px; font-size:28px; font-weight:900; margin-top:12px; }
+    .copybox { background:#f1f1f1; padding:14px; border-radius:16px; word-break:break-all; font-size:15px; }
+    .qty { display:flex; gap:8px; align-items:center; justify-content:flex-end; }
+    .qty button { padding:8px 12px; border-radius:12px; min-width:42px; }
+    .grid2 { display:grid; grid-template-columns:1fr; gap:12px; }
+    @media (min-width:720px) { .grid2 { grid-template-columns:1fr 1fr; } }
   </style>
 </head>
 <body>
-<header><h1>共同點餐 V1.3</h1><div class="sub" id="status">Firebase 連線中...</div></header>
-<div class="wrap">
-  <div class="tabs">
-    <button id="tabStores" onclick="show('stores')">店家</button>
-    <button id="tabRoom" onclick="show('room')">房間</button>
-    <button id="tabOrder" onclick="show('order')">點餐</button>
-    <button id="tabSummary" onclick="show('summary')">總覽</button>
-  </div>
+<header>
+  <h1>共同點餐 V1.4</h1>
+  <div id="status" class="status">Firebase 連線中...</div>
+</header>
 
-  <section id="stores" class="page">
+<nav class="tabs">
+  <button onclick="showPage('stores')">店家</button>
+  <button onclick="showPage('room')">房間</button>
+  <button onclick="showPage('order')">點餐</button>
+  <button onclick="showPage('summary')">總覽</button>
+</nav>
+
+<main>
+  <section id="storesPage">
     <div class="card">
-      <div class="title">選擇店家 / 新增店家</div>
-      <div id="storeList" class="muted">載入中...</div>
+      <h2>選擇店家</h2>
+      <p class="small">店家會儲存在 Firebase。不同手機開同一個網址都能讀到。</p>
+      <div id="storeList">讀取中...</div>
     </div>
+
     <div class="card">
-      <div class="title">新增或更新店家</div>
-      <div class="grid">
-        <div><div class="muted">店名</div><input id="storeName" placeholder="例如：利威特小館"></div>
-        <div><div class="muted">電話</div><input id="storePhone" placeholder="例如：07-374-5641"></div>
-      </div>
-      <div class="muted" style="margin-top:10px">貼上菜單文字。支援：餐點 價格、餐點 大價 小價、電話自動抓取。</div>
-      <textarea id="menuText" placeholder="利威特小館&#10;訂購專線：(07)374-5641&#10;陽春麵 55 45&#10;肉燥飯 40 30&#10;蛋花湯 30"></textarea>
+      <h2>新增或更新店家</h2>
+      <label>店名</label>
+      <input id="storeName" placeholder="例如：利威特小館" />
+      <label>電話</label>
+      <input id="storePhone" placeholder="例如：(07)374-5641" />
+      <label>貼上菜單文字</label>
+      <textarea id="menuText" placeholder="格式範例：
+利威特小館
+訂購專線：(07)374-5641
+陽春麵 55 45
+刀削麵 55 45
+肉燥飯 40 30
+蛋炒飯 60"></textarea>
       <div class="row">
-        <button onclick="parseAndPreview()">解析預覽</button>
-        <button class="secondary" onclick="fillDemo()">帶入範例</button>
+        <button onclick="loadSample()" class="secondary">帶入範例</button>
+        <button onclick="parsePreview()">解析預覽</button>
       </div>
-    </div>
-    <div class="card">
-      <div class="title">菜單校正</div>
-      <div id="previewMenu" class="muted">尚未解析</div>
-      <div class="row" style="margin-top:10px">
-        <button onclick="addManualItem()">新增品項</button>
-        <button onclick="saveStore()">儲存店家</button>
-      </div>
+      <div id="previewBox" class="small"></div>
+      <button onclick="saveStore()" style="margin-top:14px;">儲存店家</button>
     </div>
   </section>
 
-  <section id="room" class="page hidden">
+  <section id="roomPage" class="hide">
     <div class="card">
-      <div class="title">目前店家</div>
-      <div class="kv"><b>店名</b><span id="currentStoreName">未選擇</span><b>電話</b><span id="currentStorePhone">—</span></div>
+      <h2>目前店家</h2>
+      <div id="selectedStoreInfo" class="small">尚未選擇店家</div>
     </div>
     <div class="card">
-      <div class="title">建立 / 加入共同點餐房間</div>
-      <div class="grid">
-        <div><div class="muted">你的名字</div><input id="userName" placeholder="例如：Frank"></div>
-        <div><div class="muted">房間名稱</div><input id="roomName" value="共同點餐"></div>
+      <h2>建立房間</h2>
+      <label>你的名字</label>
+      <input id="userName" placeholder="例如：Frank" />
+      <label>房間名稱</label>
+      <input id="roomName" value="共同點餐" />
+      <button onclick="createRoom()">建立新房間</button>
+    </div>
+    <div class="card">
+      <h2>加入房間</h2>
+      <label>房間 ID</label>
+      <input id="joinRoomId" placeholder="貼上朋友給你的房間 ID" />
+      <button onclick="joinRoom()">加入房間</button>
+    </div>
+    <div class="card">
+      <h2>目前房間</h2>
+      <div id="roomInfo" class="small">尚未加入房間</div>
+      <div id="roomShare" class="copybox hide"></div>
+      <button onclick="copyRoomLink()" class="secondary" style="margin-top:10px;">複製分享連結</button>
+    </div>
+  </section>
+
+  <section id="orderPage" class="hide">
+    <div class="card">
+      <h2>點餐</h2>
+      <div id="orderContext" class="small">請先選店家並建立/加入房間</div>
+      <label>你的名字</label>
+      <input id="orderUserName" placeholder="例如：Frank" oninput="syncUserName(this.value)" />
+      <label>備註</label>
+      <input id="orderNote" placeholder="例如：小辣、不加蔥" />
+      <div id="menuList"></div>
+    </div>
+  </section>
+
+  <section id="summaryPage" class="hide">
+    <div class="card">
+      <h2>目前訂單</h2>
+      <div id="liveOrders"></div>
+      <div id="totalBox" class="total">總金額：$0</div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h2>依人彙整</h2>
+        <div id="byPerson"></div>
       </div>
-      <div class="row" style="margin-top:10px">
-        <button onclick="createRoom()">建立房間</button>
-        <button class="secondary" onclick="joinRoomPrompt()">輸入房間ID加入</button>
+      <div class="card">
+        <h2>依餐點彙整</h2>
+        <div id="byItem"></div>
       </div>
     </div>
-    <div class="card">
-      <div class="title">分享資訊</div>
-      <div id="roomInfo" class="muted">尚未進入房間</div>
-    </div>
   </section>
+</main>
 
-  <section id="order" class="page hidden">
-    <div class="card">
-      <div class="split"><div><div class="title" id="orderStoreTitle">請先選店家與房間</div><div class="muted" id="orderRoomTitle"></div></div><button class="secondary small" onclick="show('summary')">看總覽</button></div>
-      <input id="itemSearch" placeholder="搜尋餐點" oninput="renderOrderMenu()" style="margin:8px 0">
-      <input id="itemNote" placeholder="共用備註：小辣、不加蔥、飯少..." style="margin-bottom:8px">
-      <div id="orderMenu"></div>
-    </div>
-  </section>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 
-  <section id="summary" class="page hidden">
-    <div class="card"><div class="title">目前訂單</div><div id="ordersList" class="muted">尚未點餐</div></div>
-    <div class="grid">
-      <div class="card"><div class="title">依人彙整</div><div id="byPerson"></div></div>
-      <div class="card"><div class="title">依品項彙整</div><div id="byItem"></div></div>
-    </div>
-    <div class="total"><div>總金額</div><div class="num" id="grandTotal">$0</div></div>
-  </section>
-</div>
-
-<script type="module">
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js';
-import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js';
-import { getFirestore, collection, doc, addDoc, setDoc, getDoc, getDocs, onSnapshot, query, orderBy, serverTimestamp, updateDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js';
-
+<script>
 const firebaseConfig = {
   apiKey: "AIzaSyAVqIRaIwIxocyXXnkNWSrxj62cZi5-RiM",
   authDomain: "order-test-cd39a.firebaseapp.com",
@@ -101,110 +153,372 @@ const firebaseConfig = {
   appId: "1:954276356824:web:4d3044f498f0001fae6dad"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-let uid = null, stores = [], currentStore = null, currentRoom = null, roomUnsub = null, ordersUnsub = null, currentOrders = [], previewItems = [];
-const $ = (id)=>document.getElementById(id);
+let stores = [];
+let selectedStore = null;
+let currentRoomId = "";
+let unsubscribeOrders = null;
+let orders = [];
 
-function saveLocal(){ localStorage.setItem('sharedOrderState', JSON.stringify({currentStore, currentRoom, userName:$('userName').value})); }
-function loadLocal(){ try{ const s=JSON.parse(localStorage.getItem('sharedOrderState')||'{}'); if(s.userName)$('userName').value=s.userName; if(s.currentStore) currentStore=s.currentStore; if(s.currentRoom) currentRoom=s.currentRoom; }catch(e){} }
+auth.signInAnonymously()
+  .then(() => {
+    document.getElementById("status").innerText = "Firebase 已連線";
+    loadStores();
+    readUrlRoom();
+  })
+  .catch(err => {
+    document.getElementById("status").innerText = "Firebase 連線失敗：" + err.message;
+  });
 
-window.show = function(page){ document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden')); $(page).classList.remove('hidden'); document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('active')); const map={stores:'tabStores',room:'tabRoom',order:'tabOrder',summary:'tabSummary'}; $(map[page]).classList.add('active'); if(page==='order')renderOrderMenu(); if(page==='summary')renderSummary(); updateHeader(); };
-
-function updateHeader(){
-  $('currentStoreName').textContent=currentStore?.name||'未選擇'; $('currentStorePhone').textContent=currentStore?.phone||'—';
-  $('orderStoreTitle').textContent=currentStore? currentStore.name:'請先選店家'; $('orderRoomTitle').textContent=currentRoom? `房間：${currentRoom.name}｜ID：${currentRoom.id}`:'尚未進入房間';
-  $('roomInfo').innerHTML=currentRoom? `<div class="ok">已進入房間：${currentRoom.name}</div><div class="share">房間ID：${currentRoom.id}<br>分享網址：${location.origin+location.pathname+'?room='+currentRoom.id}</div>`:'尚未進入房間';
+function showPage(page) {
+  ["stores","room","order","summary"].forEach(p => document.getElementById(p + "Page").classList.add("hide"));
+  document.getElementById(page + "Page").classList.remove("hide");
 }
 
-function extractPhone(text){ const m=text.match(/(?:\(?0\d{1,3}\)?[-\s]?)?\d{3,4}[-\s]?\d{4}/); return m?m[0].replace(/\s/g,''):''; }
-function parseMenu(text){
-  const lines=text.split(/\n/).map(x=>x.trim()).filter(Boolean); const items=[]; let name=''; const phone=extractPhone(text);
-  for(const line of lines){
-    if(!name && !/\d/.test(line) && line.length<20){ name=line; continue; }
-    if(/電話|專線|地址|內用|外帶|總計|桌號|數量/.test(line)) continue;
-    const nums=[...line.matchAll(/\d{1,4}/g)].map(m=>({v:Number(m[0]),i:m.index}));
-    if(nums.length===0) continue;
-    const clean=line.replace(/元/g,'').replace(/大\s*\d+/g,'').replace(/小\s*\d+/g,'').replace(/\d{1,4}/g,'').replace(/[\$：:]/g,'').trim();
-    const base=clean || line.slice(0, nums[0].i).trim(); if(!base || base.length>30) continue;
-    if(nums.length>=2 && /大|小/.test(line)){
-      items.push({id:crypto.randomUUID(), name:base+' 大', price:nums[0].v, category:'未分類'});
-      items.push({id:crypto.randomUUID(), name:base+' 小', price:nums[1].v, category:'未分類'});
-    }else if(nums.length>=2 && nums[0].v>20 && nums[1].v>0 && nums[0].v!==10){
-      items.push({id:crypto.randomUUID(), name:base+' 大', price:nums[0].v, category:'未分類'});
-      items.push({id:crypto.randomUUID(), name:base+' 小', price:nums[1].v, category:'未分類'});
-    }else{
-      items.push({id:crypto.randomUUID(), name:base, price:nums[0].v, category:'未分類'});
+function loadSample() {
+  document.getElementById("storeName").value = "利威特小館";
+  document.getElementById("storePhone").value = "(07)374-5641";
+  document.getElementById("menuText").value =
+`利威特小館
+訂購專線：(07)374-5641
+陽春麵 55 45
+刀削麵 55 45
+麻醬乾麵 60 50
+肉燥飯 40 30
+蛋炒飯 60
+香腸炒飯 75
+腿庫飯 95 90
+油豆腐 10
+皮蛋 15
+燙青菜 35`;
+}
+
+function normalizePriceText(text) {
+  return text.replace(/元/g, "").replace(/＄/g, "$").replace(/\s+/g, " ").trim();
+}
+
+function extractPhone(text) {
+  const m = text.match(/(\(?0\d{1,2}\)?[-\s]?\d{3,4}[-\s]?\d{3,4}|09\d{2}[-\s]?\d{3}[-\s]?\d{3})/);
+  return m ? m[1].replace(/\s/g, "") : "";
+}
+
+function parseMenu(text) {
+  const lines = text.split(/\n/).map(x => x.trim()).filter(Boolean);
+  const phone = extractPhone(text);
+  let storeName = document.getElementById("storeName").value.trim() || "";
+  if (!storeName && lines.length) storeName = lines[0];
+
+  const items = [];
+  const ignoreWords = /(訂購|專線|電話|地址|內用|外帶|總計|數量|桌號|菜單|小菜類|湯類|麵類|飯類)/;
+
+  for (const raw of lines) {
+    let line = normalizePriceText(raw);
+    if (!line || ignoreWords.test(line)) continue;
+
+    const nums = [...line.matchAll(/\d{1,4}/g)].map(m => ({ value: Number(m[0]), index: m.index }));
+    if (nums.length === 0) continue;
+
+    const possiblePrices = nums.filter(n => n.value >= 5 && n.value <= 999);
+    if (possiblePrices.length === 0) continue;
+
+    const firstPriceIndex = possiblePrices[0].index;
+    let name = line.slice(0, firstPriceIndex).replace(/[\$：:]/g, "").trim();
+    if (!name || name.length < 2) continue;
+
+    const prices = possiblePrices.map(n => n.value);
+    if (prices.length >= 2) {
+      items.push({ name: name + " 大", price: prices[0] });
+      items.push({ name: name + " 小", price: prices[1] });
+    } else {
+      items.push({ name, price: prices[0] });
     }
   }
-  return {name, phone, items};
+
+  const unique = [];
+  const seen = new Set();
+  for (const item of items) {
+    const key = item.name + "-" + item.price;
+    if (!seen.has(key)) {
+      seen.add(key);
+      unique.push(item);
+    }
+  }
+  return { storeName, phone, items: unique };
 }
 
-window.parseAndPreview=function(){
-  const text=$('menuText').value; const p=parseMenu(text); if(p.name && !$('storeName').value)$('storeName').value=p.name; if(p.phone && !$('storePhone').value)$('storePhone').value=p.phone; previewItems=p.items; renderPreview();
-};
-function renderPreview(){
-  if(!previewItems.length){$('previewMenu').textContent='沒有解析到品項';return;}
-  $('previewMenu').innerHTML=previewItems.map(it=>`<div class="menuItem"><div class="grid"><input value="${esc(it.name)}" onchange="editPreview('${it.id}','name',this.value)"><input type="number" value="${it.price}" onchange="editPreview('${it.id}','price',this.value)"><input value="${esc(it.category)}" onchange="editPreview('${it.id}','category',this.value)"></div><button class="danger small" onclick="removePreview('${it.id}')">刪除</button></div>`).join('');
-}
-window.editPreview=(id,k,v)=>{ previewItems=previewItems.map(it=>it.id===id?{...it,[k]:k==='price'?Number(v||0):v}:it); };
-window.removePreview=(id)=>{ previewItems=previewItems.filter(it=>it.id!==id); renderPreview(); };
-window.addManualItem=()=>{ previewItems.push({id:crypto.randomUUID(),name:'新餐點',price:0,category:'未分類'}); renderPreview(); };
-window.fillDemo=()=>{$('menuText').value='利威特小館\n訂購專線：(07)374-5641\n陽春麵 55 45\n刀削麵 55 45\n肉燥飯 40 30\n蛋炒飯 60\n滷蛋 15\n蛋花湯 30'; parseAndPreview();};
-
-window.saveStore=async()=>{
-  if(!uid) return alert('尚未登入 Firebase'); const name=$('storeName').value.trim(); if(!name)return alert('請輸入店名'); if(!previewItems.length)return alert('請先解析或新增菜單');
-  const data={name, phone:$('storePhone').value.trim(), items:previewItems, updatedAt:serverTimestamp()};
-  const ref=await addDoc(collection(db,'stores'), data); currentStore={id:ref.id,...data}; saveLocal(); await loadStores(); updateHeader(); alert('店家已儲存'); show('room');
-};
-async function loadStores(){
-  const snap=await getDocs(collection(db,'stores')); stores=snap.docs.map(d=>({id:d.id,...d.data()})); renderStores();
-}
-function renderStores(){
-  $('storeList').innerHTML=stores.length?stores.map(s=>`<div class="storeItem"><div class="split"><div><div class="name">${esc(s.name)}</div><div class="muted">${esc(s.phone||'無電話')}｜${s.items?.length||0} 項</div></div><button onclick="selectStore('${s.id}')">選擇</button></div></div>`).join(''):'尚無店家';
-}
-window.selectStore=(id)=>{ currentStore=stores.find(s=>s.id===id); saveLocal(); updateHeader(); show('room'); };
-
-window.createRoom=async()=>{
-  if(!currentStore)return alert('請先選擇店家'); const user=$('userName').value.trim(); if(!user)return alert('請輸入你的名字');
-  const ref=await addDoc(collection(db,'rooms'),{name:$('roomName').value||'共同點餐', storeId:currentStore.id, storeName:currentStore.name, phone:currentStore.phone||'', createdAt:serverTimestamp()});
-  await enterRoom(ref.id); show('order');
-};
-window.joinRoomPrompt=async()=>{ const id=prompt('請輸入房間ID'); if(id) await enterRoom(id.trim()); };
-async function enterRoom(id){
-  const r=await getDoc(doc(db,'rooms',id)); if(!r.exists())return alert('找不到房間'); currentRoom={id,...r.data()};
-  if(!currentStore || currentStore.id!==currentRoom.storeId){ const s=await getDoc(doc(db,'stores',currentRoom.storeId)); if(s.exists()) currentStore={id:s.id,...s.data()}; }
-  if(roomUnsub)roomUnsub(); if(ordersUnsub)ordersUnsub();
-  roomUnsub=onSnapshot(doc(db,'rooms',id),snap=>{ if(snap.exists()){currentRoom={id:snap.id,...snap.data()}; updateHeader();} });
-  ordersUnsub=onSnapshot(query(collection(db,'rooms',id,'orders'), orderBy('createdAt','asc')), snap=>{ currentOrders=snap.docs.map(d=>({id:d.id,...d.data()})); renderSummary(); });
-  saveLocal(); updateHeader();
+function parsePreview() {
+  const text = document.getElementById("menuText").value;
+  const result = parseMenu(text);
+  if (result.phone && !document.getElementById("storePhone").value.trim()) {
+    document.getElementById("storePhone").value = result.phone;
+  }
+  document.getElementById("previewBox").innerHTML =
+    `<p>店名：${escapeHtml(result.storeName || "未辨識")}</p>
+     <p>電話：${escapeHtml(result.phone || document.getElementById("storePhone").value || "未辨識")}</p>
+     <p>品項數：${result.items.length}</p>
+     <div>${result.items.slice(0, 20).map(i => `<div>${escapeHtml(i.name)} - $${i.price}</div>`).join("")}</div>`;
+  return result;
 }
 
-window.addOrder=async(itemId)=>{
-  if(!currentRoom)return alert('請先建立或加入房間'); const user=$('userName').value.trim(); if(!user)return alert('請輸入你的名字'); const item=currentStore.items.find(i=>i.id===itemId); if(!item)return;
-  await addDoc(collection(db,'rooms',currentRoom.id,'orders'),{user,itemId,name:item.name,price:Number(item.price||0),qty:1,note:$('itemNote').value.trim(),createdAt:serverTimestamp()});
-};
-window.changeQty=async(id,delta)=>{ const o=currentOrders.find(x=>x.id===id); if(!o)return; const q=(o.qty||1)+delta; const ref=doc(db,'rooms',currentRoom.id,'orders',id); if(q<=0) await deleteDoc(ref); else await updateDoc(ref,{qty:q}); };
-window.deleteOrder=async(id)=>{ if(confirm('刪除這筆？')) await deleteDoc(doc(db,'rooms',currentRoom.id,'orders',id)); };
+async function saveStore() {
+  const result = parsePreview();
+  const name = document.getElementById("storeName").value.trim() || result.storeName;
+  const phone = document.getElementById("storePhone").value.trim() || result.phone;
+  if (!name) return alert("請輸入店名");
+  if (!result.items.length) return alert("沒有解析到菜單品項");
 
-window.renderOrderMenu=function(){
-  if(!currentStore){$('orderMenu').innerHTML='<div class="muted">請先選店家</div>';return;} const q=$('itemSearch').value?.trim()||'';
-  const items=(currentStore.items||[]).filter(i=>!q||i.name.includes(q));
-  $('orderMenu').innerHTML=items.map(i=>`<div class="menuItem" onclick="addOrder('${i.id}')"><div class="split"><div><div class="name">${esc(i.name)}</div><div class="muted">${esc(i.category||'未分類')}</div></div><div class="price">$${i.price}</div></div></div>`).join('')||'沒有品項';
-};
-function renderSummary(){
-  const total=currentOrders.reduce((s,o)=>s+(Number(o.price)||0)*(Number(o.qty)||1),0); $('grandTotal').textContent='$'+total;
-  $('ordersList').innerHTML=currentOrders.length?currentOrders.map(o=>`<div class="orderItem"><div class="split"><div><b>${esc(o.user)}</b>｜${esc(o.name)} x${o.qty||1}<div class="note">${esc(o.note||'無備註')}</div></div><div><b>$${o.price*(o.qty||1)}</b></div></div><div class="row" style="margin-top:8px"><button class="secondary small" onclick="changeQty('${o.id}',-1)">-</button><button class="secondary small" onclick="changeQty('${o.id}',1)">+</button><button class="danger small" onclick="deleteOrder('${o.id}')">刪除</button></div></div>`).join(''):'尚未點餐';
-  const byP={}, byI={}; currentOrders.forEach(o=>{(byP[o.user] ||= []).push(o); if(!byI[o.name])byI[o.name]={qty:0,total:0}; byI[o.name].qty+=o.qty||1; byI[o.name].total+=o.price*(o.qty||1);});
-  $('byPerson').innerHTML=Object.entries(byP).map(([u,arr])=>`<div class="orderItem"><div class="name">${esc(u)}</div>${arr.map(o=>`<div class="split"><span>${esc(o.name)} x${o.qty||1}</span><span>$${o.price*(o.qty||1)}</span></div>`).join('')}<hr><div class="split"><b>小計</b><b>$${arr.reduce((s,o)=>s+o.price*(o.qty||1),0)}</b></div></div>`).join('')||'<div class="muted">尚無</div>';
-  $('byItem').innerHTML=Object.entries(byI).map(([n,v])=>`<div class="orderItem split"><span>${esc(n)} x${v.qty}</span><b>$${v.total}</b></div>`).join('')||'<div class="muted">尚無</div>';
+  const store = {
+    name,
+    phone,
+    menu: result.items,
+    rawText: document.getElementById("menuText").value,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  };
+
+  const existing = stores.find(s => s.name === name);
+  if (existing) {
+    await db.collection("stores").doc(existing.id).set(store, { merge: true });
+  } else {
+    await db.collection("stores").add({ ...store, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+  }
+  alert("店家已儲存");
 }
-function esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 
-signInAnonymously(auth).catch(e=>{$('status').innerHTML='<span class="bad">登入失敗：'+esc(e.message)+'</span>';});
-onAuthStateChanged(auth, async user=>{ if(user){uid=user.uid; $('status').innerHTML='<span class="ok">Firebase 已連線</span>'; loadLocal(); await loadStores(); if(currentRoom?.id) await enterRoom(currentRoom.id); const params=new URLSearchParams(location.search); if(params.get('room')) await enterRoom(params.get('room')); updateHeader(); show('stores'); }});
+function loadStores() {
+  db.collection("stores").orderBy("updatedAt", "desc").onSnapshot(snapshot => {
+    stores = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    renderStores();
+  }, err => {
+    document.getElementById("storeList").innerText = "讀取店家失敗：" + err.message;
+  });
+}
+
+function renderStores() {
+  const box = document.getElementById("storeList");
+  if (!stores.length) {
+    box.innerHTML = "<p class='small'>尚無店家，請先新增。</p>";
+    return;
+  }
+  box.innerHTML = stores.map(store => `
+    <div class="store ${selectedStore && selectedStore.id === store.id ? "active" : ""}">
+      <div class="item-line">
+        <div>
+          <strong>${escapeHtml(store.name)}</strong>
+          <div class="small">${escapeHtml(store.phone || "無電話")}</div>
+          <span class="pill">${(store.menu || []).length} 個品項</span>
+        </div>
+        <button onclick="selectStore('${store.id}')">選擇</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+function selectStore(id) {
+  selectedStore = stores.find(s => s.id === id);
+  renderStores();
+  renderSelectedStore();
+  renderMenu();
+  showPage("room");
+}
+
+function renderSelectedStore() {
+  const text = selectedStore
+    ? `<strong>${escapeHtml(selectedStore.name)}</strong><br>電話：${escapeHtml(selectedStore.phone || "無")}<br>品項：${(selectedStore.menu || []).length}`
+    : "尚未選擇店家";
+  document.getElementById("selectedStoreInfo").innerHTML = text;
+  document.getElementById("orderContext").innerHTML = selectedStore
+    ? `店家：<strong>${escapeHtml(selectedStore.name)}</strong> ｜ 電話：${escapeHtml(selectedStore.phone || "無")}<br>房間：${currentRoomId || "尚未加入"}`
+    : "請先選店家並建立/加入房間";
+}
+
+async function createRoom() {
+  if (!selectedStore) return alert("請先選擇店家");
+  const user = document.getElementById("userName").value.trim() || "匿名";
+  syncUserName(user);
+  const doc = await db.collection("rooms").add({
+    roomName: document.getElementById("roomName").value.trim() || "共同點餐",
+    storeId: selectedStore.id,
+    storeName: selectedStore.name,
+    storePhone: selectedStore.phone || "",
+    menu: selectedStore.menu || [],
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  currentRoomId = doc.id;
+  document.getElementById("joinRoomId").value = currentRoomId;
+  listenRoom(currentRoomId);
+  updateRoomUi();
+  showPage("order");
+}
+
+async function joinRoom() {
+  const id = document.getElementById("joinRoomId").value.trim();
+  if (!id) return alert("請輸入房間 ID");
+  const doc = await db.collection("rooms").doc(id).get();
+  if (!doc.exists) return alert("找不到房間");
+  const data = doc.data();
+  currentRoomId = id;
+  selectedStore = { id: data.storeId || "", name: data.storeName || "未知店家", phone: data.storePhone || "", menu: data.menu || [] };
+  listenRoom(currentRoomId);
+  updateRoomUi();
+  renderSelectedStore();
+  renderMenu();
+  showPage("order");
+}
+
+function listenRoom(roomId) {
+  if (unsubscribeOrders) unsubscribeOrders();
+  unsubscribeOrders = db.collection("rooms").doc(roomId).collection("orders")
+    .orderBy("createdAt", "asc")
+    .onSnapshot(snapshot => {
+      orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      renderOrders();
+      renderSummary();
+    });
+}
+
+function updateRoomUi() {
+  document.getElementById("roomInfo").innerHTML =
+    currentRoomId
+      ? `房間 ID：<strong>${currentRoomId}</strong><br>店家：${escapeHtml(selectedStore?.name || "")}<br>電話：${escapeHtml(selectedStore?.phone || "無")}`
+      : "尚未加入房間";
+  const link = location.origin + location.pathname + "?room=" + encodeURIComponent(currentRoomId);
+  const box = document.getElementById("roomShare");
+  if (currentRoomId) {
+    box.classList.remove("hide");
+    box.innerText = link;
+  }
+}
+
+function copyRoomLink() {
+  if (!currentRoomId) return alert("尚未建立房間");
+  const link = location.origin + location.pathname + "?room=" + encodeURIComponent(currentRoomId);
+  navigator.clipboard.writeText(link).then(() => alert("已複製分享連結"));
+}
+
+function readUrlRoom() {
+  const params = new URLSearchParams(location.search);
+  const room = params.get("room");
+  if (room) {
+    document.getElementById("joinRoomId").value = room;
+    setTimeout(joinRoom, 500);
+  }
+}
+
+function syncUserName(value) {
+  document.getElementById("userName").value = value;
+  document.getElementById("orderUserName").value = value;
+}
+
+function renderMenu() {
+  const box = document.getElementById("menuList");
+  if (!selectedStore || !selectedStore.menu || !selectedStore.menu.length) {
+    box.innerHTML = "<p class='small'>尚無菜單</p>";
+    return;
+  }
+  box.innerHTML = selectedStore.menu.map((item, index) => `
+    <div class="menu-item">
+      <div class="item-line">
+        <div>
+          <strong>${escapeHtml(item.name)}</strong>
+          <div class="price">$${item.price}</div>
+        </div>
+        <button onclick="addOrder(${index})">加入</button>
+      </div>
+    </div>
+  `).join("");
+  renderSelectedStore();
+}
+
+async function addOrder(index) {
+  if (!currentRoomId) return alert("請先建立或加入房間");
+  const item = selectedStore.menu[index];
+  const user = document.getElementById("orderUserName").value.trim() || document.getElementById("userName").value.trim() || "匿名";
+  const note = document.getElementById("orderNote").value.trim();
+  await db.collection("rooms").doc(currentRoomId).collection("orders").add({
+    user,
+    itemName: item.name,
+    price: Number(item.price || 0),
+    qty: 1,
+    note,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+}
+
+async function changeQty(orderId, qty) {
+  if (qty <= 0) {
+    await db.collection("rooms").doc(currentRoomId).collection("orders").doc(orderId).delete();
+  } else {
+    await db.collection("rooms").doc(currentRoomId).collection("orders").doc(orderId).update({ qty });
+  }
+}
+
+async function deleteOrder(orderId) {
+  await db.collection("rooms").doc(currentRoomId).collection("orders").doc(orderId).delete();
+}
+
+function renderOrders() {
+  const box = document.getElementById("liveOrders");
+  if (!orders.length) {
+    box.innerHTML = "<p class='small'>尚未點餐</p>";
+    return;
+  }
+  box.innerHTML = orders.map(o => `
+    <div class="order">
+      <div class="item-line">
+        <div>
+          <strong>${escapeHtml(o.user || "匿名")}｜${escapeHtml(o.itemName)}</strong>
+          <div class="small">${escapeHtml(o.note || "無備註")}</div>
+          <div class="price">$${Number(o.price || 0) * Number(o.qty || 1)}</div>
+        </div>
+        <div class="qty">
+          <button onclick="changeQty('${o.id}', ${Number(o.qty || 1) - 1})">-</button>
+          <strong>${o.qty || 1}</strong>
+          <button onclick="changeQty('${o.id}', ${Number(o.qty || 1) + 1})">+</button>
+        </div>
+      </div>
+      <button class="secondary danger" onclick="deleteOrder('${o.id}')" style="margin-top:8px;">刪除</button>
+    </div>
+  `).join("");
+}
+
+function renderSummary() {
+  let total = 0;
+  const byPerson = {};
+  const byItem = {};
+  for (const o of orders) {
+    const amount = Number(o.price || 0) * Number(o.qty || 1);
+    total += amount;
+    const user = o.user || "匿名";
+    if (!byPerson[user]) byPerson[user] = [];
+    byPerson[user].push(o);
+    const name = o.itemName;
+    if (!byItem[name]) byItem[name] = { qty: 0, total: 0 };
+    byItem[name].qty += Number(o.qty || 1);
+    byItem[name].total += amount;
+  }
+  document.getElementById("totalBox").innerText = "總金額：$" + total;
+  document.getElementById("byPerson").innerHTML = Object.entries(byPerson).map(([user, list]) => {
+    const subtotal = list.reduce((s,o) => s + Number(o.price || 0) * Number(o.qty || 1), 0);
+    return `<div class="order">
+      <strong>${escapeHtml(user)}</strong>
+      ${list.map(o => `<div class="item-line small"><span>${escapeHtml(o.itemName)} x${o.qty || 1}</span><span>$${Number(o.price || 0) * Number(o.qty || 1)}</span></div>`).join("")}
+      <hr><div class="item-line"><strong>小計</strong><strong>$${subtotal}</strong></div>
+    </div>`;
+  }).join("") || "<p class='small'>尚無資料</p>";
+  document.getElementById("byItem").innerHTML = Object.entries(byItem).map(([name, data]) => `
+    <div class="order item-line">
+      <span>${escapeHtml(name)} x${data.qty}</span>
+      <strong>$${data.total}</strong>
+    </div>
+  `).join("") || "<p class='small'>尚無資料</p>";
+}
+
+function escapeHtml(str) {
+  return String(str ?? "").replace(/[&<>"']/g, s => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#039;" }[s]));
+}
 </script>
 </body>
 </html>
